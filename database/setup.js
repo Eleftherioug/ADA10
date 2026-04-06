@@ -1,9 +1,22 @@
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-const db = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database/tasks.db',
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required. Set it in Render or your local .env file.');
+}
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const db = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: isProduction
+        ? {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
+            }
+        }
+        : {},
     logging: false
 });
 
@@ -41,16 +54,16 @@ const Task = db.define('Task', {
         allowNull: false
     },
     description: {
-        type: DataTypes.TEXT,
-        allowNull: true
+        type: DataTypes.TEXT
+    },
+    priority: {
+        type: DataTypes.ENUM('low', 'medium', 'high'),
+        allowNull: false,
+        defaultValue: 'medium'
     },
     completed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
-    },
-    priority: {
-        type: DataTypes.STRING,
-        defaultValue: 'medium'
     }
 });
 
@@ -64,7 +77,7 @@ async function initializeDatabase() {
         await db.authenticate();
         console.log('Database connected successfully.');
 
-        await db.sync({ force: false });
+        await db.sync();
         console.log('Database synced.');
     } catch (error) {
         console.error('Database error:', error);
