@@ -1,7 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-// Use a simple SQLite storage path (important fix)
 const db = new Sequelize({
     dialect: 'sqlite',
     storage: './database/tasks.db',
