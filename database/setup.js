@@ -1,10 +1,10 @@
 const { Sequelize, DataTypes } = require('sequelize');
 require('dotenv').config();
 
-// Initialize database connection
+// Use a simple SQLite storage path (important fix)
 const db = new Sequelize({
     dialect: 'sqlite',
-    storage: `database/${process.env.DB_NAME}` || 'tasks.db',
+    storage: './database/tasks.db',
     logging: false
 });
 
@@ -55,21 +55,20 @@ const Task = db.define('Task', {
     }
 });
 
-// Define Relationships
+// Relationships
 User.hasMany(Task, { foreignKey: 'userId' });
 Task.belongsTo(User, { foreignKey: 'userId' });
 
-// Initialize database
+// Initialize DB
 async function initializeDatabase() {
     try {
         await db.authenticate();
-        console.log('Database connection established successfully.');
-        
+        console.log('Database connected successfully.');
+
         await db.sync({ force: false });
-        console.log('Database synchronized successfully.');
-        
+        console.log('Database synced.');
     } catch (error) {
-        console.error('Unable to connect to database:', error);
+        console.error('Database error:', error);
     }
 }
 
