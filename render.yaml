@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ada10-task-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeployTrigger: commit
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ada10-task-db
+          property: connectionString
+
+databases:
+  - name: ada10-task-db
+    plan: free
+    databaseName: tasks
